@@ -19,10 +19,6 @@ class DataTable
 
     private array   $columnNameArr; // список всех столбцов
 
-    private string  $columnName; // Имя столбца для сортировки
-
-    private string  $columnSortOrder;  // Порядок сортировки
-
     private ?string $searchValue; // Значение в строке поиска
 
     private Model   $model; // Модель для поиска
@@ -31,9 +27,13 @@ class DataTable
 
     private bool    $isFilter = false; // Установлен ли хоть один фильтр
 
-    private Builder $records; // Запрос для получения записей из базы
-
     private int     $totalRecords; // Общее количество записей в таблице
+
+    public Builder $records; // Запрос для получения записей из базы
+
+    public string  $columnName; // Имя столбца для сортировки
+
+    public string  $columnSortOrder;  // Порядок сортировки
 
     /**
      * Инициализация
