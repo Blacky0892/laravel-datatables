@@ -1,0 +1,27 @@
+{
+    "name": "blacky0892/laravel-datatables",
+    "description": "Laravel integration with DataTable",
+    "type": "library",
+    "require": {
+        "php": "^7.4|^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Blacky0892\\LaravelDatatables\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Anton Mironov",
+            "email": "anton@anton-mironov.ru"
+        }
+    ],
+    "minimum-stability": "dev",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Blacky0892\\LaravelDatatables\\LaravelDatatableServiceProvider"
+            ]
+        }
+    }
+}
