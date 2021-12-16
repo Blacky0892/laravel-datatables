@@ -27,13 +27,13 @@ class DataTable
 
     private int     $totalRecords; // Общее количество записей в таблице
 
-    public ?string $searchValue; // Значение в строке поиска
+    private ?string $searchValue; // Значение в строке поиска
 
-    public Builder $records; // Запрос для получения записей из базы
+    private string   $columnName; // Имя столбца для сортировки
 
-    public string  $columnName; // Имя столбца для сортировки
+    private string   $columnSortOrder;  // Порядок сортировки
 
-    public string  $columnSortOrder;  // Порядок сортировки
+    public Builder  $records; // Запрос для получения записей из базы
 
     /**
      * Инициализация
@@ -123,10 +123,10 @@ class DataTable
             $where = is_null($prefix) ? $where : $prefix . $where;
             if(is_null($child))
             {
-                $this->records = $this->records->where($where, $f);
+                $this->records->where($where, $f);
             }
             else {
-                $this->records = $this->records->whereHas($child, function($q) use ($where, $f){
+                $this->records->whereHas($child, function($q) use ($where, $f){
                     $q->where($where, $f);
                 });
             }
@@ -147,7 +147,7 @@ class DataTable
             $end       = $dates[1] ?? $dates[0];
             $endDate   = Carbon::parse($end)->setTime(23, 59, 59);
 
-            $this->records = $this->records->whereBetween($field, [$startDate, $endDate]);
+            $this->records->whereBetween($field, [$startDate, $endDate]);
             $this->isFilter = true;;
         }
     }
@@ -161,7 +161,7 @@ class DataTable
     {
         if ($this->searchValue) {
             // Весь поиск из строки в отдельном Where, т.к тут есть ИЛИ
-            $this->records = $this->records->where(function ($q) use ($columns) {
+            $this->records->where(function ($q) use ($columns) {
                 foreach ($columns as $column) {
                     if (is_array($column)) {
                         $key   = $column['key'];
@@ -191,18 +191,17 @@ class DataTable
     public function sortWithJoin(string $table, string $field, string $order, bool $isFK = true)
     {
         if($isFK){
-            $this->records = $this->records
+            $this->records
                 ->join($table, $table . '.id', '=', $this->model->getTable() . '.' . $field);
         }
         else{
-            $this->records = $this->records
+            $this->records
                 ->join($table, $table . '.'. $field, '=', $this->model->getTable() . '.id');
         }
-        $this->records =
-            $this->records
-                ->orderBy($table . '.' . $order, $this->columnSortOrder)
-                // Хак для избавления от выбора полей с одинаковым именем из разных таблиц
-                ->select($this->model->getTable() . '.*', $table . '.' . $order . ' as orderField');
+        $this->records
+            ->orderBy($table . '.' . $order, $this->columnSortOrder)
+            // Хак для избавления от выбора полей с одинаковым именем из разных таблиц
+            ->select($this->model->getTable() . '.*', $table . '.' . $order . ' as orderField');
     }
 
     /**
@@ -210,7 +209,7 @@ class DataTable
      */
     public function simpleSort()
     {
-        $this->records = $this->records->orderBy($this->columnName, $this->columnSortOrder);
+        $this->records->orderBy($this->columnName, $this->columnSortOrder);
     }
 
     /**
@@ -252,4 +251,29 @@ class DataTable
     {
         $this->isFilter = $value;
     }
+
+    /**
+     * @return mixed|string
+     */
+    public function getColumnName()
+    {
+        return $this->columnName;
+    }
+
+    /**
+     * @return mixed|string|null
+     */
+    public function getSearchValue()
+    {
+        return $this->searchValue;
+    }
+
+    /**
+     * @return mixed|string
+     */
+    public function getColumnSortOrder()
+    {
+        return $this->columnSortOrder;
+    }
+
 }
