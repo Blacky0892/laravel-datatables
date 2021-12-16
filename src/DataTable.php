@@ -100,7 +100,7 @@ class DataTable
      * @param string $needle Имя колонки для фильтрации
      * @return string
      */
-    private function columnFilter(string $needle): ?string
+    public function columnFilter(string $needle): ?string
     {
         $key = array_search($needle, array_column($this->columnNameArr, 'data'));
 
@@ -246,5 +246,10 @@ class DataTable
         return $this->records->skip($this->start)
             ->take($this->rowPerPage)
             ->get();
+    }
+
+    public function setIsFilter(bool $value = true)
+    {
+        $this->isFilter = $value;
     }
 }
