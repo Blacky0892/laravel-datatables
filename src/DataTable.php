@@ -1,4 +1,5 @@
 <?php
+/** @noinspection UnknownColumnInspection */
 declare(strict_types = 1);
 
 namespace Blacky0892\LaravelDatatables;
@@ -33,6 +34,8 @@ class DataTable
 
     private string   $columnSortOrder;  // Порядок сортировки
 
+    private string   $tableName; // Имя таблицы в базе
+
     public Builder  $records; // Запрос для получения записей из базы
 
     /**
@@ -56,6 +59,7 @@ class DataTable
 
         $this->model        = new $model();
         $this->totalRecords = $this->getTotalCount();
+        $this->tableName    = $this->model->getTable();
 
         $this->records = $this->model::query();
     }
@@ -172,7 +176,7 @@ class DataTable
                     }
                     /* Для поиска в том случае если разные таблицы
                     имеют одинаковые ключи указываем имя таблицы */
-                    $key = $this->model->getTable() . '.' . $key;
+                    $key = $this->tableName . '.' . $key;
 
                     $q->orWhere($key, 'like', '%' . $value . '%');
                 }
@@ -192,16 +196,16 @@ class DataTable
     {
         if($isFK){
             $this->records
-                ->join($table, $table . '.id', '=', $this->model->getTable() . '.' . $field);
+                ->join($table, $table . '.id', '=', $this->tableName . '.' . $field);
         }
         else{
             $this->records
-                ->join($table, $table . '.'. $field, '=', $this->model->getTable() . '.id');
+                ->join($table, $table . '.'. $field, '=', $this->tableName . '.id');
         }
         $this->records
             ->orderBy($table . '.' . $order, $this->columnSortOrder)
             // Хак для избавления от выбора полей с одинаковым именем из разных таблиц
-            ->select($this->model->getTable() . '.*', $table . '.' . $order . ' as orderField');
+            ->select($this->tableName . '.*', $table . '.' . $order . ' as orderField');
     }
 
     /**
@@ -247,12 +251,19 @@ class DataTable
             ->get();
     }
 
+    /**
+     * Установка значения isFilter для вывода количества
+     * отфильтрованных записей
+     * @param  bool  $value
+     * @return void
+     */
     public function setIsFilter(bool $value = true)
     {
         $this->isFilter = $value;
     }
 
     /**
+     * Имя столбца для сортировки
      * @return mixed|string
      */
     public function getColumnName()
@@ -261,6 +272,7 @@ class DataTable
     }
 
     /**
+     * Значение в строке поиска
      * @return mixed|string|null
      */
     public function getSearchValue()
@@ -269,11 +281,21 @@ class DataTable
     }
 
     /**
+     * Направление сортировки
      * @return mixed|string
      */
     public function getColumnSortOrder()
     {
         return $this->columnSortOrder;
+    }
+
+    /**
+     * Имя таблицы
+     * @return string
+     */
+    public function getTableName(): string
+    {
+        return $this->tableName;
     }
 
 }
