@@ -196,11 +196,11 @@ class DataTable
     {
         if($isFK){
             $this->records
-                ->join($table, $table . '.id', '=', $this->tableName . '.' . $field);
+                ->leftJoin($table, $table . '.id', '=', $this->tableName . '.' . $field);
         }
         else{
             $this->records
-                ->join($table, $table . '.'. $field, '=', $this->tableName . '.id');
+                ->leftJoin($table, $table . '.'. $field, '=', $this->tableName . '.id');
         }
         $this->records
             ->orderBy($table . '.' . $order, $this->columnSortOrder)
