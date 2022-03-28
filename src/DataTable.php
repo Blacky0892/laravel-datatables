@@ -50,11 +50,11 @@ class DataTable
         $this->rowPerPage = (int) $request->get('length');
 
         $orderArr    = $request->get('order');
-        $columnIndex = $orderArr[0]['column'];
+        $columnIndex = $orderArr[0]['column'] ?? 0;
 
         $this->columnNameArr   = $request->get('columns');
         $this->columnName      = $this->columnNameArr[$columnIndex]['data'];
-        $this->columnSortOrder = $orderArr[0]['dir'];
+        $this->columnSortOrder = $orderArr[0]['dir'] ?? 'asc';
         $this->searchValue     = $request->get('search')['value'];
 
         $this->model        = new $model();
