@@ -26,7 +26,7 @@ class DataTable
 
     private bool    $isFilter = false; // Установлен ли хоть один фильтр
 
-    private int     $totalRecords; // Общее количество записей в таблице
+    private int     $totalRecords = 0; // Общее количество записей в таблице
 
     private ?string $searchValue; // Значение в строке поиска
 
@@ -45,6 +45,7 @@ class DataTable
      */
     public function __construct(Request $request, string $model)
     {
+
         $this->draw       = (int) $request->get('draw');
         $this->start      = (int) $request->get('start');
         $this->rowPerPage = (int) $request->get('length');
@@ -70,7 +71,15 @@ class DataTable
      */
     public function getTotalCount(): int
     {
-        return $this->model::count();
+        return $this->totalRecords === 0 ? $this->model::count() : $this->totalRecords;
+    }
+
+    /**
+     * Ручная установка общего числа записей, если применён какой-либо общий фильтр
+     * @return void
+     */
+    public function setTotalCount(){
+        $this->totalRecords = $this->records->count();
     }
 
     /**
