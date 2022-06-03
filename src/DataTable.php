@@ -161,7 +161,7 @@ class DataTable
             $endDate   = Carbon::parse($end)->setTime(23, 59, 59);
 
             $this->records->whereBetween($field, [$startDate, $endDate]);
-            $this->isFilter = true;;
+            $this->isFilter = true;
         }
     }
 
@@ -246,7 +246,12 @@ class DataTable
      */
     public function getTotalRecordsWithFilter(): int
     {
-        return $this->isFilter ? $this->records->count() : $this->totalRecords;
+        return $this->isFilter ?
+            $this->records
+                ->distinct($this->tableName .'.id')
+                ->skip(0)
+                ->take($this->rowPerPage)->count()
+            : $this->totalRecords;
     }
 
     /**
@@ -255,7 +260,9 @@ class DataTable
      */
     public function getRecords(): Collection
     {
-        return $this->records->skip($this->start)
+        return $this->records
+            ->distinct($this->tableName .'.id')
+            ->skip($this->start)
             ->take($this->rowPerPage)
             ->get();
     }
