@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DataTable
 {
@@ -76,10 +77,16 @@ class DataTable
 
     /**
      * Ручная установка общего числа записей, если применён какой-либо общий фильтр
+     * @param string|null $groupField - Поле для группировки
      * @return void
      */
-    public function setTotalCount(){
-        $this->totalRecords = $this->records->count();
+    public function setTotalCount(?string $groupField = null){
+        if(is_null($groupField)){
+            $this->totalRecords = $this->records->count();
+        }
+        else{
+            $this->totalRecords = $this->records->distinct()->count($groupField);
+        }
     }
 
     /**
@@ -222,7 +229,14 @@ class DataTable
      */
     public function simpleSort()
     {
-        $this->records->orderBy($this->columnName, $this->columnSortOrder);
+        if(config('database.default') === 'pgsql'){
+            $this->records->orderBy(DB::raw("CASE WHEN \"$this->columnName\" < 'A'
+    THEN lpad(\"$this->columnName\", 255, '0')
+    ELSE \"$this->columnName\" END"), $this->columnSortOrder);
+        }
+        else{
+            $this->records->orderBy($this->columnName, $this->columnSortOrder);
+        }
     }
 
     /**
@@ -260,11 +274,14 @@ class DataTable
      */
     public function getRecords(): Collection
     {
-        return $this->records
-            ->distinct($this->tableName .'.id')
+        $result = $this->records
             ->skip($this->start)
             ->take($this->rowPerPage)
-            ->get();
+        ;
+        if(config('database.default') !== 'pgsql'){
+            $result->distinct($this->tableName .'.id');
+        }
+        return $result->get();
     }
 
     /**
